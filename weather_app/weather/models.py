@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 import math
 
@@ -54,6 +55,7 @@ class Wind(models.Model):
         if self.direction not in directions and not (0 <= int(self.direction) <= 360):
             raise ValueError(f"Invalid wind direction: {self.direction}")
     
+    @property
     def descriptive_direction(self):
         """
         Returns human readable wind direction
@@ -73,3 +75,29 @@ class Wind(models.Model):
             wind_chill = 13.12 + 0.6215 * temperature - 11.37 * math.pow(wind_speed, 0.16) + 0.3965 * temperature * math.pow(wind_speed, 0.16)
             return wind_chill
         return temperature
+    
+class Humidity(models.Model):
+    """
+    Represents the class Humidity
+    """
+    def __init__(self, relative_humidity=None):
+        """
+        Initializes the humidity class
+        """
+        self.relative_humidity = relative_humidity
+    
+    @property
+    def humidity(self):
+        """
+        Getter method that retrieves humidity
+        """
+        return self._relative_humidity
+    
+    @humidity.setter
+    def humidity_setter(self, value):
+        """
+        Setter method that sets humidity value
+        """
+        if value is not None and (value < 0 and value > 100):
+            raise ValueError("Relative humidity must be between 0 and 100")
+        self._relative_humidity = value
