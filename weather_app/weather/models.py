@@ -63,3 +63,13 @@ class Wind(models.Model):
             "S": "South", "SE": "Southeast", "SW": "Southwest", "W": "West"
         }
         return compass_points.get(self.direction, f"{self.direction} degrees")
+    
+    def calculate_wind_chill(self, temperature):
+        """
+        Calculates wind chill based on temp and wind speed
+        """
+        wind_speed = self.speed_kmh
+        if temperature <= 10 and wind_speed >= 4.8:
+            wind_chill = 13.12 + 0.6215 * temperature - 11.37 * math.pow(wind_speed, 0.16) + 0.3965 * temperature * math.pow(wind_speed, 0.16)
+            return wind_chill
+        return temperature
