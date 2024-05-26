@@ -1,4 +1,4 @@
-# Weather_App:hammer:
+# Weather_Wise :hammer:
 
 ## Overview
 
