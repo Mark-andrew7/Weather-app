@@ -104,4 +104,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 Caleb Baraka - [@your_twitter_handle](https://x.com/Calebbarak81904) - calebbaraka79@gmail.com
->>>>>>> 705e2839e96f9632d3a4025bc8065048ad730f0d
