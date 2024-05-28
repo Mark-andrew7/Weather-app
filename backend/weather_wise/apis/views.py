@@ -26,7 +26,7 @@ class TemperatureViewSet(viewsets.ModelViewSet):
         }
         return Response(data)
     
-class WindViewSet:
+class WindViewSet(viewsets.ModelViewSet):
     """
     Viewset for handling wind data
     """
