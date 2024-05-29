@@ -12,7 +12,8 @@ class TemperatureViewSet(viewsets.ModelViewSet):
     """
     queryset = Temperature.objects.all()
     serializer_class = TemperatureSerializer
-
+    
+    # Not necessary
     def retrieve(self):
         """
         Handle GET requests for individual temp instances
