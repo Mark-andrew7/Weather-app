@@ -1,7 +1,10 @@
 import logo from "./logo.svg";
 import "./App.css";
-import Header from "./Header";
-import Hero from "./Hero";
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import Features from "./components/Features";
+import About from "./components/About";
+import CallToAction from "./components/CallToAction";
 //import logo from "./images/logo.png";
 
 function App() {
@@ -9,6 +12,9 @@ function App() {
     <div className="App">
       <Header />
       <Hero />
+      <Features />
+      <About />
+      <CallToAction />
     </div>
   );
 }
