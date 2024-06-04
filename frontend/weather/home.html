@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+</head>
+<body>
+    <h1>Weather Information</h1>
+    <h2>Temperature</h2>
+    <ul>
+        {% for temp in temperature_data %}
+            <li>{{ temp.value }} {{ temp.unit }} ({{ temp.value_c }}°C / {{ temp.value_f }}°F)</li>
+        {% endfor %}
+    </ul>
+    <h2>Wind</h2>
+    <ul>
+        {% for wind in wind_data %}
+            <li>{{ wind.speed_mps }} m/s ({{ wind.speed_kmh }} km/h), {{ wind.description }} 
+            {% if wind.wind_chill %}
+                - Wind Chill: {{ wind.wind_chill }}°C
+            {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+
