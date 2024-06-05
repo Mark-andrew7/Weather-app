@@ -1,67 +1,67 @@
 from django.shortcuts import render
-import math
+from .models import Temperature, Wind
+from .utils import convert_temp, speed_kmh, descriptive_direction, calculate_wind_chill
+import requests
 
-def convert_temp(value, unit, target_unit):
-    """
-    Converts temperature from one unit to another (Celsius to Fahrenheit and vice versa).
+def fetch_weather_data(location):
+    # # Fetch the API key from settings
+    api_key = settings.WEATHER_API_KEY
 
-    :param value: The temperature value to convert.
-    :param unit: The current unit of the temperature ('C' for Celsius, 'F' for Fahrenheit).
-    :param target_unit: The target unit to convert to ('C' or 'F').
-    :return: The converted temperature value.
-    :raises ValueError: If the target unit conversion is not supported.
-    """
-    if unit == target_unit:
-        return value
-    elif unit == 'C' and target_unit == 'F':
-        return value * 9 / 5 + 32
-    elif unit == 'F' and target_unit == 'C':
-        return (value - 32) * 5 / 9
+    # Make a request to the weather API
+    response = requests.get('https://api.weatherapi.com/forecast', params={'q': location, 'key': api_key})
+
+    # Process the API response
+    if response.status_code == 200:
+        data = response.json()
+        current_condition = data['current']
+        temperature_celcius = current_condition['temp_c']
+        temperature_farenheit = convert_temp(temperature_celcius, 'C', 'F')
+        wind_speed_mps = current_condition['wind_kmh'] / 3.6
+        wind_speed_kmh = speed_kmh(wind_speed_mps)
+
+        # Create and save Temperature instance
+        temperature = Temperature.objects.create(value=temperature_celcius, unit='C')
+        temperature.save()
+
+        # Create and save Temperature instance
+        wind = Wind.objects.create(speed=wind_speed_kmh)
+        wind.save()
+
+        return temperature, wind
     else:
-        raise ValueError(f"Unsupported unit conversion from {unit} to {target_unit}")
+        print('Failed to Fetch weather data')
+        return None, None, None
 
-def speed_kmh(speed_mps):
+def home(request):
     """
-    Converts speed from meters per second (m/s) to kilometers per hour (km/h).
+    Retrieve Temp and Wind data from database
+    """
+    temperature_data = Temperature.objects.all()
+    wind_data = Wind.objects.all()
 
-    :param speed_mps: Speed in meters per second.
-    :return: Speed in kilometers per hour.
-    """
-    return speed_mps * 3.6
+    temp_data = []
+    for temp in temperature_data:
+        temp_value_c = temp.value if temp.unit == 'C' else convert_temp(temp.value, temp.unit, 'C')
+        temp_data.append({
+            'value': temp.value,
+            'unit': temp.unit,
+            'value_c': temp_value_c,
+            'value_f': convert_temp(temp.value, temp.unit, 'F'),
+        })
 
-def validate_direction(direction):
-    """
-    Validates if the wind direction is either a valid compass point or a degree between 0 and 360.
+    wind_data_list = []
+    for wind in wind_data:
+        speed_in_kmh = speed_kmh(wind.speed)
+        wind_data_list.append({
+            'speed_mps': wind.speed,
+            'speed_kmh': speed_in_kmh,
+            'direction': wi-nd.direction,
+            'description': descriptive_direction(wind.direction),
+            'wind_chill': calculate_wind_chill(temp_data[0]['value_c'], speed_in_kmh) if temp_data else None
+        })
 
-    :param direction: The wind direction to validate.
-    :raises ValueError: If the direction is not valid.
-    """
-    directions = ["N", "NE", "NW", "S", "SW", "SE", "E", "W"]
-    if direction not in directions and not (0 <= int(direction) <= 360):
-        raise ValueError(f"Invalid wind direction: {direction}")
-
-def descriptive_direction(direction):
-    """
-    Converts a wind direction from compass points or degrees to a human-readable description.
-
-    :param direction: The wind direction to describe.
-    :return: A human-readable description of the wind direction.
-    """
-    compass_points = {
-        "N": "North", "NE": "Northeast", "NW": "Northwest", "E": "East",
-        "S": "South", "SE": "Southeast", "SW": "Southwest", "W": "West"
+    context = {
+        'temperature_data': temp_data,
+        'wind_data': wind_data_list,
     }
-    return compass_points.get(direction, f"{direction} degrees")
-
-def calculate_wind_chill(temperature, speed_kmh):
-    """
-    Calculates the wind chill based on temperature and wind speed in km/h.
-
-    :param temperature: The air temperature in Celsius.
-    :param speed_kmh: The wind speed in kilometers per hour.
-    :return: The calculated wind chill if applicable, otherwise the original temperature.
-    """
-    if temperature <= 10 and speed_kmh >= 4.8:
-        wind_chill = 13.12 + 0.6215 * temperature - 11.37 * math.pow(speed_kmh, 0.16) + 0.3965 * temperature * math.pow(speed_kmh, 0.16)
-        return wind_chill
-    return temperature
+    return render(request, 'home.html', context)
